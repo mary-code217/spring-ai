@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Chatbot</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: hsl(0 0% 98%);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: hsl(0 0% 3.9%);
+        }
+
+        .chat-box {
+            width: 420px;
+            height: 600px;
+            background: hsl(0 0% 100%);
+            border-radius: 12px;
+            border: 1px solid hsl(0 0% 89.8%);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .header {
+            background: hsl(0 0% 100%);
+            color: hsl(0 0% 3.9%);
+            padding: 16px;
+            font-size: 15px;
+            font-weight: 600;
+            text-align: center;
+            border-bottom: 1px solid hsl(0 0% 89.8%);
+            letter-spacing: -0.01em;
+        }
+
+        .chat-area {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            background: hsl(0 0% 98%);
+        }
+
+        .message {
+            max-width: 75%;
+            padding: 10px 14px;
+            border-radius: 8px;
+            line-height: 1.5;
+            font-size: 14px;
+            word-break: break-word;
+            white-space: pre-wrap;
+        }
+
+        .message.user {
+            align-self: flex-end;
+            background: hsl(0 0% 9%);
+            color: hsl(0 0% 98%);
+        }
+
+        .message.ai {
+            align-self: flex-start;
+            background: hsl(0 0% 100%);
+            color: hsl(0 0% 3.9%);
+            border: 1px solid hsl(0 0% 89.8%);
+        }
+
+        .message.loading {
+            align-self: flex-start;
+            background: hsl(0 0% 100%);
+            color: hsl(0 0% 45.1%);
+            border: 1px solid hsl(0 0% 89.8%);
+        }
+
+        .loading-dots::after {
+            content: '';
+            animation: dots 1.5s steps(4, end) infinite;
+        }
+
+        @keyframes dots {
+            0%   { content: ''; }
+            25%  { content: '.'; }
+            50%  { content: '..'; }
+            75%  { content: '...'; }
+            100% { content: ''; }
+        }
+
+        .input-area {
+            padding: 12px;
+            background: hsl(0 0% 100%);
+            border-top: 1px solid hsl(0 0% 89.8%);
+            display: flex;
+            gap: 8px;
+            align-items: flex-end;
+        }
+
+        .input-area textarea {
+            flex: 1;
+            padding: 8px 12px;
+            border: 1px solid hsl(0 0% 89.8%);
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: inherit;
+            resize: none;
+            outline: none;
+            max-height: 80px;
+            line-height: 1.5;
+            color: hsl(0 0% 3.9%);
+            transition: border-color 0.15s, box-shadow 0.15s;
+        }
+
+        .input-area textarea::placeholder {
+            color: hsl(0 0% 45.1%);
+        }
+
+        .input-area textarea:focus {
+            border-color: hsl(0 0% 9%);
+            box-shadow: 0 0 0 2px hsl(0 0% 9% / 0.1);
+        }
+
+        .input-area button {
+            padding: 8px 16px;
+            background: hsl(0 0% 9%);
+            color: hsl(0 0% 98%);
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: background 0.15s;
+        }
+
+        .input-area button:hover {
+            background: hsl(0 0% 15%);
+        }
+
+        .input-area button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-box">
+    <div class="header">AI Chatbot</div>
+    <div class="chat-area" id="chatArea"></div>
+    <div class="input-area">
+        <textarea id="messageInput" rows="1" placeholder="메시지를 입력하세요..."
+                  oninput="this.style.height='auto'; this.style.height=this.scrollHeight+'px';"></textarea>
+        <button id="sendBtn" onclick="sendMessage()">전송</button>
+    </div>
+    </div>
+
+    <script>
+        const chatArea = document.getElementById('chatArea');
+        const input = document.getElementById('messageInput');
+        const sendBtn = document.getElementById('sendBtn');
+
+        input.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+
+        function addMessage(text, type) {
+            const div = document.createElement('div');
+            div.className = `message ${type}`;
+            div.textContent = text;
+            chatArea.appendChild(div);
+            chatArea.scrollTop = chatArea.scrollHeight;
+            return div;
+        }
+
+        function addLoading() {
+            const div = document.createElement('div');
+            div.className = 'message loading';
+            div.innerHTML = '<span class="loading-dots">응답 생성 중</span>';
+            chatArea.appendChild(div);
+            chatArea.scrollTop = chatArea.scrollHeight;
+            return div;
+        }
+
+        async function sendMessage() {
+            const message = input.value.trim();
+            if (!message) return;
+
+            addMessage(message, 'user');
+            input.value = '';
+            input.style.height = 'auto';
+            sendBtn.disabled = true;
+
+            const loading = addLoading();
+
+            try {
+                const res = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message })
+                });
+
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+                const data = await res.json();
+                loading.remove();
+                addMessage(data.answer, 'ai');
+            } catch (err) {
+                loading.remove();
+                addMessage('오류가 발생했습니다: ' + err.message, 'ai');
+            } finally {
+                sendBtn.disabled = false;
+                input.focus();
+            }
+        }
+
+        input.focus();
+    </script>
+</body>
+</html>
