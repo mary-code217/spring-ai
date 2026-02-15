@@ -46,6 +46,6 @@
 ## 런타임 설정
 
 - 서버 포트: 8090
-- 임베딩 차원: 3072
+- 임베딩 차원: 768
 - RAG similarityThreshold: 0.3, topK: 5
 - Docker: `docker compose up -d` 로 PostgreSQL 시작 필요

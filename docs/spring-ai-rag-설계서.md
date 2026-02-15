@@ -109,7 +109,7 @@ implementation 'org.springframework.ai:spring-ai-advisors-vector-store'
 # 임베딩 모델
 spring.ai.google.genai.embedding.api-key=${GOOGLE_GENAI_API_KEY}
 spring.ai.google.genai.embedding.text.options.model=gemini-embedding-001
-spring.ai.google.genai.embedding.text.options.dimensions=3072
+spring.ai.google.genai.embedding.text.options.dimensions=768
 
 # 파일 업로드 제한
 spring.servlet.multipart.max-file-size=10MB
@@ -214,7 +214,7 @@ spring.datasource.driver-class-name=org.postgresql.Driver
 spring.ai.vectorstore.pgvector.initialize-schema=true
 spring.ai.vectorstore.pgvector.index-type=HNSW
 spring.ai.vectorstore.pgvector.distance-type=COSINE_DISTANCE
-spring.ai.vectorstore.pgvector.dimensions=3072
+spring.ai.vectorstore.pgvector.dimensions=768
 ```
 
 ### 핵심 변경사항
@@ -251,7 +251,7 @@ docker exec -it spring-ai-pgvector psql -U postgres -d spring_ai -c "SELECT COUN
 |------|------|
 | Chat/Embedding API 키를 별도로 설정해야 함 | `spring.ai.google.genai.embedding.api-key`를 반드시 추가 |
 | SimpleVectorStore ↔ PgVectorStore 빈 충돌 | Stage 3에서 VectorStoreConfig 삭제 (또는 `@Profile("simple")` 분리) |
-| 임베딩 차원 불일치 | PgVector dimensions(3072)과 gemini-embedding-001 출력 차원(3072) 일치 확인 |
+| 임베딩 차원 불일치 | PgVector dimensions(768)과 gemini-embedding-001 출력 차원(768) 일치 확인. HNSW 인덱스는 최대 2000 차원 제한 있음 |
 | Tika 전이 의존성 충돌 | 발생 시 `build.gradle`에서 exclude로 해결 |
 | Docker 미설치 | Stage 3 전에 Docker Desktop 설치 필요 |
 
