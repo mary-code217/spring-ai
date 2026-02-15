@@ -18,8 +18,8 @@
         }
 
         .chat-box {
-            width: 420px;
-            height: 600px;
+            width: 480px;
+            height: 680px;
             background: hsl(0 0% 100%);
             border-radius: 12px;
             border: 1px solid hsl(0 0% 89.8%);
@@ -32,12 +32,101 @@
         .header {
             background: hsl(0 0% 100%);
             color: hsl(0 0% 3.9%);
-            padding: 16px;
+            padding: 14px 16px;
             font-size: 15px;
             font-weight: 600;
             text-align: center;
             border-bottom: 1px solid hsl(0 0% 89.8%);
             letter-spacing: -0.01em;
+        }
+
+        /* 모드 전환 탭 */
+        .mode-tabs {
+            display: flex;
+            border-bottom: 1px solid hsl(0 0% 89.8%);
+            background: hsl(0 0% 100%);
+        }
+
+        .mode-tab {
+            flex: 1;
+            padding: 10px;
+            text-align: center;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            border: none;
+            background: none;
+            color: hsl(0 0% 45.1%);
+            transition: all 0.15s;
+            border-bottom: 2px solid transparent;
+        }
+
+        .mode-tab:hover {
+            color: hsl(0 0% 20%);
+            background: hsl(0 0% 97%);
+        }
+
+        .mode-tab.active {
+            color: hsl(0 0% 3.9%);
+            border-bottom-color: hsl(0 0% 9%);
+        }
+
+        /* 문서 업로드 영역 */
+        .upload-area {
+            padding: 12px 16px;
+            background: hsl(0 0% 97%);
+            border-bottom: 1px solid hsl(0 0% 89.8%);
+            display: none;
+        }
+
+        .upload-area.show {
+            display: block;
+        }
+
+        .upload-zone {
+            border: 2px dashed hsl(0 0% 80%);
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.15s;
+            background: hsl(0 0% 100%);
+        }
+
+        .upload-zone:hover {
+            border-color: hsl(0 0% 50%);
+            background: hsl(0 0% 98%);
+        }
+
+        .upload-zone.dragover {
+            border-color: hsl(0 0% 9%);
+            background: hsl(0 0% 95%);
+        }
+
+        .upload-zone p {
+            font-size: 13px;
+            color: hsl(0 0% 45.1%);
+            margin-top: 4px;
+        }
+
+        .upload-zone .icon {
+            font-size: 24px;
+            margin-bottom: 4px;
+        }
+
+        .upload-status {
+            margin-top: 8px;
+            font-size: 12px;
+            color: hsl(0 0% 45.1%);
+            text-align: center;
+        }
+
+        .upload-status.success {
+            color: hsl(142 71% 35%);
+        }
+
+        .upload-status.error {
+            color: hsl(0 84% 50%);
         }
 
         .chat-area {
@@ -51,7 +140,7 @@
         }
 
         .message {
-            max-width: 75%;
+            max-width: 80%;
             padding: 10px 14px;
             border-radius: 8px;
             line-height: 1.5;
@@ -71,6 +160,15 @@
             background: hsl(0 0% 100%);
             color: hsl(0 0% 3.9%);
             border: 1px solid hsl(0 0% 89.8%);
+        }
+
+        .message.system {
+            align-self: center;
+            background: hsl(0 0% 95%);
+            color: hsl(0 0% 45.1%);
+            font-size: 12px;
+            padding: 6px 12px;
+            max-width: 90%;
         }
 
         .message.loading {
@@ -147,24 +245,131 @@
             opacity: 0.5;
             cursor: not-allowed;
         }
+
+        /* 모드 표시 뱃지 */
+        .mode-badge {
+            display: inline-block;
+            font-size: 11px;
+            font-weight: 500;
+            padding: 2px 8px;
+            border-radius: 10px;
+            margin-left: 8px;
+            vertical-align: middle;
+        }
+
+        .mode-badge.chat {
+            background: hsl(0 0% 90%);
+            color: hsl(0 0% 30%);
+        }
+
+        .mode-badge.rag {
+            background: hsl(210 80% 92%);
+            color: hsl(210 80% 35%);
+        }
     </style>
 </head>
 <body>
     <div class="chat-box">
-    <div class="header">AI Chatbot</div>
-    <div class="chat-area" id="chatArea"></div>
-    <div class="input-area">
-        <textarea id="messageInput" rows="1" placeholder="메시지를 입력하세요..."
-                  oninput="this.style.height='auto'; this.style.height=this.scrollHeight+'px';"></textarea>
-        <button id="sendBtn" onclick="sendMessage()">전송</button>
-    </div>
+        <div class="header">
+            AI Chatbot <span id="modeBadge" class="mode-badge chat">일반</span>
+        </div>
+
+        <!-- 모드 전환 탭 -->
+        <div class="mode-tabs">
+            <button class="mode-tab active" onclick="setMode('chat')">일반 채팅</button>
+            <button class="mode-tab" onclick="setMode('rag')">RAG 채팅</button>
+        </div>
+
+        <!-- 문서 업로드 (RAG 모드에서만 표시) -->
+        <div class="upload-area" id="uploadArea">
+            <div class="upload-zone" id="uploadZone" onclick="document.getElementById('fileInput').click()">
+                <div class="icon">📄</div>
+                <p>파일을 드래그하거나 클릭하여 업로드</p>
+                <p style="font-size:11px; margin-top:2px;">PDF, DOCX, TXT 등</p>
+            </div>
+            <input type="file" id="fileInput" style="display:none" onchange="uploadFile(this.files[0])">
+            <div class="upload-status" id="uploadStatus"></div>
+        </div>
+
+        <div class="chat-area" id="chatArea"></div>
+
+        <div class="input-area">
+            <textarea id="messageInput" rows="1" placeholder="메시지를 입력하세요..."
+                      oninput="this.style.height='auto'; this.style.height=this.scrollHeight+'px';"></textarea>
+            <button id="sendBtn" onclick="sendMessage()">전송</button>
+        </div>
     </div>
 
     <script>
         const chatArea = document.getElementById('chatArea');
         const input = document.getElementById('messageInput');
         const sendBtn = document.getElementById('sendBtn');
+        const uploadArea = document.getElementById('uploadArea');
+        const uploadZone = document.getElementById('uploadZone');
+        const uploadStatus = document.getElementById('uploadStatus');
+        const modeBadge = document.getElementById('modeBadge');
 
+        let currentMode = 'chat'; // 'chat' or 'rag'
+
+        // 모드 전환
+        function setMode(mode) {
+            currentMode = mode;
+            document.querySelectorAll('.mode-tab').forEach((tab, i) => {
+                tab.classList.toggle('active', (i === 0 && mode === 'chat') || (i === 1 && mode === 'rag'));
+            });
+            uploadArea.classList.toggle('show', mode === 'rag');
+            modeBadge.className = `mode-badge ${mode}`;
+            modeBadge.textContent = mode === 'chat' ? '일반' : 'RAG';
+            input.placeholder = mode === 'chat' ? '메시지를 입력하세요...' : '문서에 대해 질문하세요...';
+            addMessage(mode === 'chat' ? '일반 채팅 모드로 전환했습니다.' : 'RAG 모드로 전환했습니다. 먼저 문서를 업로드해주세요.', 'system');
+        }
+
+        // 드래그 앤 드롭
+        uploadZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadZone.classList.add('dragover');
+        });
+        uploadZone.addEventListener('dragleave', () => {
+            uploadZone.classList.remove('dragover');
+        });
+        uploadZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadZone.classList.remove('dragover');
+            if (e.dataTransfer.files.length > 0) {
+                uploadFile(e.dataTransfer.files[0]);
+            }
+        });
+
+        // 파일 업로드
+        async function uploadFile(file) {
+            if (!file) return;
+            uploadStatus.textContent = `"${file.name}" 업로드 중...`;
+            uploadStatus.className = 'upload-status';
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            try {
+                const res = await fetch('/api/documents', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+                const data = await res.json();
+                uploadStatus.textContent = `"${data.fileName}" 업로드 완료 (${data.chunksProcessed}개 청크 처리)`;
+                uploadStatus.className = 'upload-status success';
+                addMessage(`📄 "${data.fileName}" 문서가 처리되었습니다. (${data.chunksProcessed}개 청크)`, 'system');
+            } catch (err) {
+                uploadStatus.textContent = '업로드 실패: ' + err.message;
+                uploadStatus.className = 'upload-status error';
+            }
+
+            document.getElementById('fileInput').value = '';
+        }
+
+        // 키보드 이벤트
         input.addEventListener('keydown', (e) => {
             if (e.key === 'Enter' && !e.shiftKey) {
                 e.preventDefault();
@@ -200,9 +405,10 @@
             sendBtn.disabled = true;
 
             const loading = addLoading();
+            const endpoint = currentMode === 'rag' ? '/api/rag/chat' : '/api/chat';
 
             try {
-                const res = await fetch('/api/chat', {
+                const res = await fetch(endpoint, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ message })
