@@ -3,12 +3,14 @@ package com.example.ai.controller;
 import com.example.ai.dto.DocumentResponse;
 import com.example.ai.service.DocumentService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+@Slf4j
 @RestController
 @RequestMapping("/api")
 @RequiredArgsConstructor
@@ -18,11 +20,16 @@ public class DocumentController {
 
     @PostMapping("/documents")
     public DocumentResponse uploadDocument(@RequestParam("file") MultipartFile file) {
-        int chunks = documentService.processDocument(file.getResource());
-        return new DocumentResponse(
+        log.info("POST /api/documents - 파일: {}, 크기: {}KB, 타입: {}",
                 file.getOriginalFilename(),
-                chunks,
-                "문서 처리가 완료되었습니다."
-        );
+                file.getSize() / 1024,
+                file.getContentType());
+
+        int chunks = documentService.processDocument(file.getResource());
+
+        String message = chunks > 0 ? "문서 처리가 완료되었습니다." : "문서에서 텍스트를 추출할 수 없습니다.";
+        log.info("POST /api/documents - 응답: {} ({}개 청크)", message, chunks);
+
+        return new DocumentResponse(file.getOriginalFilename(), chunks, message);
     }
 }
