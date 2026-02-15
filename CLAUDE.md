@@ -15,6 +15,12 @@
 
 - 구현 계획서: `docs/spring-ai-rag-설계서.md`
 
+## Git 브랜치 전략
+
+- **반드시 master 브랜치에서 직접 작업한다** (별도 브랜치/worktree 생성 금지)
+- 커밋은 기능 단위로 작게 쪼개서 한다
+- 커밋 메시지는 변경 내용을 명확히 기술한다
+
 ## 코드 컨벤션
 
 - Controller → Service → Repository 계층 구조
