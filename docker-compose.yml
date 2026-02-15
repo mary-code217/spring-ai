@@ -1,0 +1,16 @@
+version: '3.8'
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: spring-ai-pgvector
+    environment:
+      POSTGRES_DB: spring_ai
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgvector_data:/var/lib/postgresql/data
+
+volumes:
+  pgvector_data:
