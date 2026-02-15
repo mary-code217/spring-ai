@@ -104,8 +104,8 @@ implementation 'org.springframework.ai:spring-ai-tika-document-reader'
 ```properties
 # 임베딩 모델
 spring.ai.google.genai.embedding.api-key=${GOOGLE_GENAI_API_KEY}
-spring.ai.google.genai.embedding.text.options.model=text-embedding-004
-spring.ai.google.genai.embedding.text.options.dimensions=768
+spring.ai.google.genai.embedding.text.options.model=gemini-embedding-001
+spring.ai.google.genai.embedding.text.options.dimensions=3072
 
 # 파일 업로드 제한
 spring.servlet.multipart.max-file-size=10MB
