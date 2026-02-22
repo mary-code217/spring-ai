@@ -13,7 +13,8 @@
 
 ## 설계 문서
 
-- 구현 계획서: `docs/spring-ai-rag-설계서.md`
+- 구현 계획서 (Stage 1~3): `docs/spring-ai-rag-설계서.md`
+- 확장 계획서 (Stage 4~9): `docs/spring-ai-확장-설계서.md`
 
 ## Git 브랜치 전략
 
@@ -28,12 +29,19 @@
 - DTO는 `dto` 패키지에 분리
 - 설정 클래스는 `config` 패키지에 분리
 - API 키는 환경변수로 주입 (하드코딩 금지)
+- **코드 구현 완료 시 관련 문서(CLAUDE.md, 설계서 등)를 반드시 최신화한다**
 
 ## 진행 상황
 
 - **Stage 1 ✅**: 기본 Gemini 챗봇 (POST /api/chat + 웹 UI)
 - **Stage 2 ✅**: SimpleVectorStore 기반 RAG (문서 업로드 ETL + RAG 채팅)
 - **Stage 3 ✅**: PgVector 통합 (Docker Compose + 영속적 벡터 저장)
+- **Stage 4**: Streaming 응답 (SSE, `call()` → `stream()`)
+- **Stage 5**: 대화 히스토리 (ChatMemory + JDBC 영속화)
+- **Stage 6**: 에러 처리 및 안정성 (@ControllerAdvice)
+- **Stage 7**: 프롬프트 엔지니어링 & 가드레일
+- **Stage 8**: Function Calling (@Tool 도구 호출)
+- **Stage 9**: Observability (Actuator + Micrometer)
 
 ## API 엔드포인트
 
