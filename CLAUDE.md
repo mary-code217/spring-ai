@@ -15,6 +15,7 @@
 
 - 구현 계획서 (Stage 1~3): `docs/spring-ai-rag-설계서.md`
 - 확장 계획서 (Stage 4~9): `docs/spring-ai-확장-설계서.md`
+- RAG 고도화 계획서 (Stage 10~13): `docs/spring-ai-rag-고도화-설계서.md`
 
 ## Git 브랜치 전략
 
@@ -42,6 +43,10 @@
 - **Stage 7**: 프롬프트 엔지니어링 & 가드레일
 - **Stage 8**: Function Calling (@Tool 도구 호출)
 - **Stage 9**: Observability (Actuator + Micrometer)
+- **Stage 10**: ETL 고도화 (KeywordEnricher + SummaryEnricher + 청킹 최적화)
+- **Stage 11**: 검색 고도화 (RetrievalAugmentationAdvisor + 쿼리 변환 + 멀티 쿼리 + 메타데이터 필터링)
+- **Stage 12**: Reranker (LLM 기반 검색 결과 재정렬)
+- **Stage 13**: Agentic RAG (자율 검색 에이전트, @Tool 기반 재검색 루프)
 
 ## API 엔드포인트
 
